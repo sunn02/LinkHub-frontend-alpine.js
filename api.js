@@ -1,4 +1,3 @@
-// api.js
 const API_URL = "http://localhost:3005";
 
 function handleHTTPError(response) {
