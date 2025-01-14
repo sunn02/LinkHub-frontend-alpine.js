@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enlaces</title>
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.11.1/dist/cdn.min.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div id="app" x-data="Alpine.store('app')">
+    <!-- Vista Home -->
+    <div x-show="!currentLink">
+      <input type="text" id="tag-filter" placeholder="Filtrar por etiqueta" x-model="tagFilter" />
+      <button @click="fetchLinks(tagFilter)">Filtrar</button>
+
+      <div id="links-container">
+        <template x-for="link in links" :key="link._id">
+          <div>
+            <p><strong>Título:</strong> <span x-text="link.title"></span></p>
+            <p><strong>URL:</strong> <a :href="link.url" target="_blank" x-text="link.url"></a></p>
+            <p><strong>Descripción:</strong> <span x-text="link.description"></span></p>
+            <p><strong>Etiquetas:</strong> <span x-text="link.tags.join(', ')"></span></p>
+            <button @click="loadLinkDetails(link._id)">Ver detalles</button>
+          </div>
+        </template>
+      </div>
+
+      <button @click="navigate('savelink')">Crear enlace</button>
+    </div>
+
+    <!-- Vista Detalles -->
+    <div x-show="currentLink">
+      <h2>Detalles</h2>
+      <p><strong>Título:</strong> <span x-text="currentLink.title"></span></p>
+      <p><strong>URL:</strong> <a :href="currentLink.url" target="_blank" x-text="currentLink.url"></a></p>
+      <p><strong>Descripción:</strong> <span x-text="currentLink.description"></span></p>
+      <p><strong>Votos:</strong> <span x-text="currentLink.votes"></span></p>
+
+      <div id="commentsList">
+        <template x-for="comment in currentLink.comments" :key="comment._id">
+          <div>
+            <p><strong>Comentario:</strong> <span x-text="comment.content"></span></p>
+            <p><strong>Fecha:</strong> <span x-text="new Date(comment.createdAt).toLocaleString()"></span></p>
+          </div>
+        </template>
+      </div>
+
+      <button @click="voteLink(currentLink._id)">Votar</button>
+      <textarea id="commentInput" x-model="newComment" placeholder="Escribe tu comentario aquí"></textarea>
+      <button @click="commentLink(currentLink._id)">Comentar</button>
+      <button @click="navigate('home')">Volver</button>
+    </div>
+
+    <!-- Vista Crear Enlace -->
+    <div x-show="isSaveLink">
+      <h2>Crear Enlace</h2>
+      <input type="text" id="link-title" placeholder="Título" x-model="newLink.title" />
+      <input type="url" id="link-url" placeholder="URL" x-model="newLink.url" />
+      <input type="text" id="link-description" placeholder="Descripción" x-model="newLink.description" />
+      <input type="text" id="link-tags" placeholder="Etiquetas" x-model="newLink.tags" />
+      <button @click="saveLink(newLink.title, newLink.url, newLink.description, newLink.tags)">Guardar</button>
+      <button @click="navigate('home')">Volver</button>
+    </div>
+  </div>
+</body>
+</html>
