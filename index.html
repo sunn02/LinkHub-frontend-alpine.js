@@ -1,20 +1,65 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prueba Alpine.js</title>
-    <script defer src="api.js"></script>
-    <script defer src="app.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  </head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prueba Alpine.js</title>
+  <script defer src="api.js"></script>
+  <script defer src="app.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
 <body>
   <div x-data="app()" x-init="init()">
     <header>
-        <h1>Enlaces</h1>
-        <nav>
-          <button @click="currentPage= 'home'">Inicio</button>
-        </nav>
+      <nav>
+        <button @click="switchPage('home')">Inicio</button>
+        <!-- <button @click="switchPage('newLink')">Nuevo Enlace</button> -->
+      </nav>
     </header>
+
+    <!-- Vista: Home -->
+    <section x-show="currentPage === 'home'">
+      <ul>
+        <template x-for="link in links" :key="link._id">
+          <div class="link">
+            <p><strong x-text="link.title"></strong></p>
+            <p><strong>URL:</strong> <a :href="link.url" target="_blank" x-text="link.url"></a></p>
+            <p><strong>Descripción:</strong> <span x-text="link.description || 'Sin descripción'"></span></p>
+            <p><strong>Etiquetas:</strong> <span x-text="link.tags?.join(', ') || 'Sin etiquetas'"></span></p>
+            <button @click="showDetails(link._id)">Ver detalles</button>
+        </template>
+        
+      </ul>
+    </section>
+
+    <!-- Vista: Detalles -->
+    <section x-show="currentPage === 'details'">
+      <h2>Detalles</h2>
+      <h4>Comentarios</h4>
+      <ul>
+        <template x-for="comment in comments" :key="comment._id">
+          <li x-text="comment.content"></li>
+        </template>
+      </ul>
+      <textarea x-ref="commentInput" placeholder="Añadir un comentario"></textarea>
+      <button @click="addComment($refs.commentInput.value); $refs.commentInput.value = ''">Comentar</button>
+      <button @click="switchPage('home')">Volver</button>
+    </section>
+
+    <!-- Vista: Nuevo Enlace -->
+    <section x-show="currentPage === 'newLink'">
+      <h2>Crear Nuevo Enlace</h2>
+      <form @submit.prevent="saveNewLink()">
+        <label for="title">Título:</label>
+        <input id="title" type="text" x-model="newLink.title" required>
+        <label for="url">URL:</label>
+        <input id="url" type="url" x-model="newLink.url" required>
+        <label for="tags">Etiquetas (separadas por comas):</label>
+        <input id="tags" type="text" x-model="newLink.tags">
+        <button type="submit">Guardar</button>
+        <button type="button" @click="switchPage('home')">Cancelar</button>
+      </form>
+    </section>
+  </div>
 </body>
 </html>
