@@ -10,15 +10,22 @@
 </head>
 <body>
   <div x-data="app()" x-init="init()">
-    <header>
+    <!-- <header>
       <nav>
         <button @click="switchPage('home')">Inicio</button>
-        <!-- <button @click="switchPage('newLink')">Nuevo Enlace</button> -->
+        <button @click="switchPage('newLink')">Nuevo Enlace</button>
       </nav>
-    </header>
+    </header> -->
 
     <!-- Vista: Home -->
     <section x-show="currentPage === 'home'">
+
+      <input 
+      x-model="tagFilter" 
+      placeholder="Filtrar por etiqueta" 
+      @input="filterLinks()" 
+    />
+
       <ul>
         <template x-for="link in links" :key="link._id">
           <div class="link">
@@ -28,21 +35,24 @@
             <p><strong>Etiquetas:</strong> <span x-text="link.tags?.join(', ') || 'Sin etiquetas'"></span></p>
             <button @click="showDetails(link._id)">Ver detalles</button>
         </template>
-        
       </ul>
+      <button @click="switchPage('newLink')">Añadir enlace</button>
     </section>
 
     <!-- Vista: Detalles -->
     <section x-show="currentPage === 'details'">
       <h2>Detalles</h2>
+      <p><strong>Votos:</strong> <span x-text="currentLink ? currentLink.votes : 'Cargando...'"></span></p>
+      <button @click="vote(currentLink._id)">Votar</button>
+
       <h4>Comentarios</h4>
       <ul>
         <template x-for="comment in comments" :key="comment._id">
           <li x-text="comment.content"></li>
         </template>
       </ul>
-      <textarea x-ref="commentInput" placeholder="Añadir un comentario"></textarea>
-      <button @click="addComment($refs.commentInput.value); $refs.commentInput.value = ''">Comentar</button>
+      <textarea x-ref="commentInput" placeholder="Escribe tu comentario..."></textarea>
+      <button @click="addComment($refs.commentInput.value); $refs.commentInput.value = ''">Enviar</button>
       <button @click="switchPage('home')">Volver</button>
     </section>
 
@@ -52,8 +62,13 @@
       <form @submit.prevent="saveNewLink()">
         <label for="title">Título:</label>
         <input id="title" type="text" x-model="newLink.title" required>
+
         <label for="url">URL:</label>
         <input id="url" type="url" x-model="newLink.url" required>
+
+        <label for="description">Descripción:</label>
+        <input id="description" x-model="newLink.description" required></label>
+
         <label for="tags">Etiquetas (separadas por comas):</label>
         <input id="tags" type="text" x-model="newLink.tags">
         <button type="submit">Guardar</button>

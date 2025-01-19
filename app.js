@@ -9,7 +9,7 @@ window.app = function () {
     currentLink: null,
     comments: [],
     newLink: { title: '', url: '', tags: '' },
-    tagFilter: null,
+    tagFilter: '',
 
     async init() {
       console.log('Main app initialized');
@@ -18,12 +18,20 @@ window.app = function () {
 
     async loadLinks() {
       try {
-        this.links = await showLinks(this.tagFilter);
+        this.links = await showLinks();
       } catch (error) {
         console.error(`Error al cargar los enlaces: ${error.message}`);
       }
     },
-
+    async filterLinks() {
+      console.log('Filtrando por:', this.tagFilter);
+      if (this.tagFilter) {
+        // Si hay filtro, obtenemos los enlaces filtrados por la etiqueta
+        this.links = await showLinks(this.tagFilter);
+      } else {
+        await this.loadLinks(); // Vuelve a cargar los enlaces sin filtro
+      }
+    },
     async showDetails(linkId) {
       try {
         const { link, comments } = await loadLinkDetails(linkId);
@@ -45,12 +53,11 @@ window.app = function () {
       }
     },
 
-    async vote(linkId) {
+    async vote() {
       try {
-        const updatedLink = await voteLink(linkId);
-        this.links = this.links.map(link =>
-          link._id === linkId ? updatedLink : link
-        );
+        const linkId = this.currentLink._id;
+        this.currentLink = await voteLink(linkId);
+        
       } catch (error) {
         console.error(`Error al votar: ${error.message}`);
       }
@@ -64,6 +71,7 @@ window.app = function () {
       try {
         const savedLink = await saveLink(this.newLink);
         this.links.push(savedLink);
+        console.log('Enlace guardado')
         this.newLink = { title: '', url: '', tags: '' }; // Limpia el formulario
         this.currentPage = 'home';
       } catch (error) {
